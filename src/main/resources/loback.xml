@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration debug="false">
     <contextName>NNERO</contextName>
-    <property name="logDir" value="F:\\code\\logs\\webpractice"/>
+    <!--<property name="logDir" value="F:\\code\\logs\\webpractice"/>-->
+    <property name="logDir" value="D:\\working\\project\\webserver"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
