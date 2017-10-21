@@ -20,6 +20,10 @@ public interface HttpResponse {
 
     int getContentLength();
 
+    void setContentType(String type);
+
+    String getContentType();
+
     ResponseWriter getWriter();
 
     void addCookie(Cookie cookie);
