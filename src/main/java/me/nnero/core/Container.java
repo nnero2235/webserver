@@ -1,7 +1,8 @@
 package me.nnero.core;
 
-import nnero.http.HttpRequest;
-import nnero.http.HttpResponse;
+
+import me.nnero.http.HttpRequest;
+import me.nnero.http.HttpResponse;
 
 /**
  * Author: NNERO

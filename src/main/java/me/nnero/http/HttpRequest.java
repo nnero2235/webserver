@@ -23,8 +23,6 @@ public interface HttpRequest {
 
     String getHost();
 
-    int getPort();
-
     String getClientIPAddress();
 
     List<Cookie> getCookies();
