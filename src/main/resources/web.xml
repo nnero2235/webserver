@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf8" ?>
+<servlets>
+    <servlet>
+        <className>me.ddkj.test.MyServlet</className>
+        <path>/servlet/hello</path>
+    </servlet>
+    <servlet>
+        <className>me.ddkj.test.NiceServlet</className>
+        <path>/haha</path>
+    </servlet>
+</servlets>
