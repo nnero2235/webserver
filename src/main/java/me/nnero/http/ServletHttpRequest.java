@@ -42,10 +42,13 @@ public class ServletHttpRequest implements HttpRequest{
 
     private long contentLength;
 
+    private String protocol;
+
     public ServletHttpRequest(InputStream is,String clientIP){
         socketInputStream = is;
         this.clientIP = clientIP;
         headerMap = new HashMap<>();
+        contentLength = -1; //means  client doesn't set header : content-length
     }
 
     private void parseRequestLine(String requestLine){
@@ -60,16 +63,19 @@ public class ServletHttpRequest implements HttpRequest{
                     path = path.substring(0, index);
                 }
             }
+            protocol = parts[2];
         } catch (Exception e) {
-            throw new BadRequestException("request line is broken");
+            throw new BadRequestException("request line: "+requestLine+" is broken");
         }
-//        schema = parts[2];
     }
 
-    //需要用的时候才解析
+    //when need then parse
+    //only GET method
+    // if POST method see @RequestBody class
     private void parseRequestParams(){
         if(!Strings.isNullOrEmpty(queryString)) {
-            String[] paramStrings = queryString.split("\\&");
+            requestParamMap = new HashMap<>();
+            String[] paramStrings = queryString.split("&");
             for (String s : paramStrings) {
                 String[] paramKV = s.split("=");
                 if (paramKV.length == 2) {
@@ -82,11 +88,11 @@ public class ServletHttpRequest implements HttpRequest{
     }
 
     private void parseHeader(String line){
-        String[] headerString = line.split(":");
-        if(headerString.length == 2){
-            String name = headerString[0].trim().toLowerCase();
-            String value = headerString[1].trim().toLowerCase();
-            if("cookie".equalsIgnoreCase(name)){ //解析cookie
+        int splitIndex = line.indexOf(":");
+        if(splitIndex != -1){
+            String name = line.substring(0,splitIndex).trim().toLowerCase();
+            String value = line.substring(splitIndex+1).trim().toLowerCase();
+            if("cookie".equalsIgnoreCase(name)){ //parse cookie
                 String[] cookieValues = value.split(";");
                 cookies = new ArrayList<>();
                 for(String cookieV : cookieValues){
@@ -96,8 +102,17 @@ public class ServletHttpRequest implements HttpRequest{
                         cookies.add(cookie);
                     }
                 }
+            } else if("accept".equalsIgnoreCase(name)){ //parse mimetype
+                mimeType = MimeType.parse(value);
+            } else if("content-length".equalsIgnoreCase(name)){//parse content-length
+                try {
+                    contentLength = Long.parseLong(value);
+                } catch (NumberFormatException e) {
+                }
             }
             headerMap.put(name,value);
+        } else {
+            throw new BadRequestException("header :"+line+" is broken!");
         }
     }
 
@@ -114,17 +129,17 @@ public class ServletHttpRequest implements HttpRequest{
                 if(lineNumber == 1) { //parse request line
                     parseRequestLine(line);
                 }
-                //reach get end break
+                //reach end of header area
                 if(lineNumber != 1 && Strings.isNullOrEmpty(line)){
-                    if("GET".equals(method)){
+                    if("GET".equals(method)){ //means parse is over
                         break;
-                    } else if("POST".equals(method)){
-                        //TODO:parse requestbody
+                    } else if("POST".equals(method)){ //means needing to parse requestBody
+                        requestBody = new RequestBody(socketInputStream,contentLength);
+                        break;
                     } else {
                         break;
                     }
                 }
-
                 parseHeader(line);
             }
         } catch (IOException e) {
@@ -139,6 +154,9 @@ public class ServletHttpRequest implements HttpRequest{
 
     @Override
     public Map<String, String> getParameterMap() {
+        if(requestParamMap == null){
+            parseRequestParams();
+        }
         return requestParamMap;
     }
 
@@ -148,7 +166,10 @@ public class ServletHttpRequest implements HttpRequest{
             throw new NullPointerException("name can't be null");
         }
         if(requestParamMap == null){
-            return null;
+            parseRequestParams();
+            if(requestParamMap == null){ //if null then parse means no params
+                return null;
+            }
         }
         return requestParamMap.get(name.toLowerCase());
     }
@@ -216,5 +237,10 @@ public class ServletHttpRequest implements HttpRequest{
     @Override
     public long getContentLength() {
         return contentLength;
+    }
+
+    @Override
+    public String getProtocol() {
+        return protocol;
     }
 }

@@ -36,4 +36,6 @@ public interface HttpRequest {
     RequestBody getRequestBody();
 
     long getContentLength();
+
+    String getProtocol();
 }
