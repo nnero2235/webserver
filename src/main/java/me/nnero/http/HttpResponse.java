@@ -1,5 +1,8 @@
 package me.nnero.http;
 
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 /**
@@ -8,7 +11,7 @@ import java.util.Map;
  */
 public interface HttpResponse {
 
-    int getCode();
+    void setStatusCode(int code);
 
     Map<String,String> getHeaderMap();
 
@@ -18,13 +21,17 @@ public interface HttpResponse {
 
     void setContentLength(long length);
 
-    int getContentLength();
+    long getContentLength();
 
     void setContentType(String type);
 
     String getContentType();
 
-    ResponseWriter getWriter();
+    PrintWriter getWriter();
 
     void addCookie(Cookie cookie);
+
+    OutputStream getOutputStream();
+
+    void setContentEncoding(Charset charset);
 }

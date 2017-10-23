@@ -23,7 +23,7 @@ public class DefaultConnectionPool implements ConnectionPool {
 
     public DefaultConnectionPool(int maxThreads){
         if(maxThreads <= 0){
-            throw new RuntimeException("max threads must be  > 0");
+            throw new RuntimeException("max threads must be > 0");
         }
         threadPool = new ThreadPoolExecutor(0,maxThreads,ALIVE_TIME,
                 TimeUnit.SECONDS, new SynchronousQueue<>(),defaultHandler);

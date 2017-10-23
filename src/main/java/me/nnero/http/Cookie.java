@@ -35,41 +35,6 @@ public class Cookie {
         this.comment = "";//nothing
     }
 
-
-    public String getSetCookieHeaderString(){
-        StringBuilder sb = new StringBuilder(100);
-        sb.append(name)
-                .append("=")
-                .append(value)
-                .append(";")
-                .append("Domain")
-                .append("=")
-                .append(domain)
-                .append(";")
-                .append("Path")
-                .append("=")
-                .append(path)
-                .append(";")
-                .append("Version")
-                .append("=")
-                .append(version)
-                .append(";")
-                .append("Max-Age")
-                .append("=")
-                .append(maxAge)
-                .append(";");
-        if(!Strings.isNullOrEmpty(comment)){
-            sb.append("Comment")
-                    .append("=")
-                    .append(comment);
-        }
-        if(secure != -1){
-            sb.append(secure)
-                    .append(";");
-        }
-        return sb.toString();
-    }
-
     public String getName() {
         return name;
     }
