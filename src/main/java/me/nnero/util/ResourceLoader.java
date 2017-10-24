@@ -1,5 +1,6 @@
 package me.nnero.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -12,6 +13,7 @@ import java.util.Iterator;
  * Author: NNERO
  * Time : 15:40 2017/10/23
  */
+@Slf4j
 public class ResourceLoader {
 
     private static volatile ResourceLoader sLoader;
@@ -19,7 +21,10 @@ public class ResourceLoader {
     private String classPath;
 
     private ResourceLoader() {
-        classPath = Thread.currentThread().getContextClassLoader().getResource("/").getPath();
+//        classPath = Thread.currentThread().getContextClassLoader().getResource("/").getPath();
+//        classPath = System.getProperty("user.dir");
+        classPath = this.getClass().getResource("/").getPath();
+        log.debug("classPath: "+classPath);
     }
 
     public static ResourceLoader getLoader() {

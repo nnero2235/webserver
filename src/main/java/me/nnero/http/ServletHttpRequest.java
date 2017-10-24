@@ -128,19 +128,20 @@ public class ServletHttpRequest implements HttpRequest{
                 line = reader.readLine();
                 if(lineNumber == 1) { //parse request line
                     parseRequestLine(line);
-                }
-                //reach end of header area
-                if(lineNumber != 1 && Strings.isNullOrEmpty(line)){
-                    if("GET".equals(method)){ //means parse is over
-                        break;
-                    } else if("POST".equals(method)){ //means needing to parse requestBody
-                        requestBody = new RequestBody(socketInputStream,contentLength);
-                        break;
-                    } else {
-                        break;
+                } else {
+                    //reach end of header area
+                    if (Strings.isNullOrEmpty(line)) {
+                        if ("GET".equals(method)) { //means parse is over
+                            break;
+                        } else if ("POST".equals(method)) { //means needing to parse requestBody
+                            requestBody = new RequestBody(socketInputStream, contentLength);
+                            break;
+                        } else {
+                            break;
+                        }
                     }
+                    parseHeader(line);
                 }
-                parseHeader(line);
             }
         } catch (IOException e) {
             log.error("request parse error ",e);

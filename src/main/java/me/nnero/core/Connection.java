@@ -37,18 +37,22 @@ public class Connection implements Runnable{
         } catch (IOException e) {
             log.error("",e);
         }
+        log.info("server shutdown!");
     }
 
     @Override
     public void run() {
         InetAddress clientAddress = clientSocket.getInetAddress();
         String clientIP = clientAddress.getCanonicalHostName();
+        log.info("process from ip: "+clientIP);
         ServletHttpRequest request = null;
         ServletHttpResponse response = null;
         try {
             request = new ServletHttpRequest(clientSocket.getInputStream(),clientIP);
             response = new ServletHttpResponse(clientSocket.getOutputStream());
+            log.debug("request start parsing...");
             request.parse();
+            log.debug("request end parsing.");
             container.process(request,response);
         } catch (IOException e) {
             log.error("",e);

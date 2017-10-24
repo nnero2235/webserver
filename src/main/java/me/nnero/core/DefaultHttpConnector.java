@@ -37,6 +37,7 @@ public class DefaultHttpConnector implements HttpConnector{
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(port,0, InetAddress.getByName(host));
+            log.info("start and listen on : "+port);
             while (!shutdown){
                 Socket clientSocket = serverSocket.accept();
                 pool.asyncProcessSocket(clientSocket);

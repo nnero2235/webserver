@@ -6,13 +6,13 @@ package me.nnero.http;
  **/
 public enum StatusCode {
 
-    OK(200,"200 ok"),
-    REDIRECT(302,"302 redirect"),
-    NOT_MODIFY(304,"304 not modify"),
-    BAD_REQUEST(400,"400 bad request"),
-    FORBIDDEN(403,"403 forbidden"),
-    NOT_FOUND(404,"404 not found"),
-    SERVER_ERROR(500,"500 server error");
+    OK(200,"200 OK"),
+    REDIRECT(302,"302 Redirect"),
+    NOT_MODIFY(304,"304 Not Modify"),
+    BAD_REQUEST(400,"400 Bad Request"),
+    FORBIDDEN(403,"403 Forbidden"),
+    NOT_FOUND(404,"404 Not Found"),
+    SERVER_ERROR(500,"500 Server Error");
 
 
     private int code;
@@ -45,6 +45,8 @@ public enum StatusCode {
             return FORBIDDEN;
         } else if(SERVER_ERROR.code == code){
             return SERVER_ERROR;
+        } else if(BAD_REQUEST.code == code){
+            return BAD_REQUEST;
         } else {
             throw new IllegalArgumentException("unknown status code: "+code);
         }

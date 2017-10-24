@@ -31,6 +31,7 @@ public class ServletContainer implements Container {
     public void process(HttpRequest request, HttpResponse response) throws IOException{
         String path = request.getPath();
         String className = registry.getClassName(path);
+        log.info("process---> path:"+path+" className: "+className);
         if(!Strings.isNullOrEmpty(className)){
             String classPath = ResourceLoader.getLoader().getClassPath();
             String classRepo = new URL("file",null,classPath + File.separator).toString();

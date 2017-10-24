@@ -23,6 +23,7 @@ public class ServletRegistry {
             ResourceLoader.getLoader().loadWebXMLConfigFile((className,path) -> {
                 servletMappingRegistry.put(className,path);
             });
+            log.info("web.xml init success!");
         } catch (DocumentException e) {
             log.warn("Web.xml parse error: ",e);
         }

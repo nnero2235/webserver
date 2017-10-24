@@ -1,6 +1,8 @@
 package me.nnero.http;
 
 import com.google.common.base.Strings;
+import com.google.errorprone.annotations.SuppressPackageLocation;
+import lombok.extern.slf4j.Slf4j;
 import me.nnero.http.exception.ServerErrorException;
 import me.nnero.util.Constants;
 
@@ -17,6 +19,7 @@ import java.util.Map;
  * Author: NNERO
  * Time: 2017/10/22 15:47
  **/
+@Slf4j
 public class ServletHttpResponse implements HttpResponse {
 
     private OutputStream socketOutputStream;
@@ -124,6 +127,7 @@ public class ServletHttpResponse implements HttpResponse {
 
     //when user invoke  getOutputStream() or getWriter() , will trigger this method to write meta data to client
     private void writeAndFlushResponseLineAndHeader(){
+        log.debug("write response header info...");
         StringBuilder sb = new StringBuilder();
         sb.append("HTTP/1.1 ").append(statusCode.desc()).append("\r\n");//response line
         sb.append("Server: ").append(Constants.SERVER_NAME).append("\r\n"); // server header
@@ -133,6 +137,8 @@ public class ServletHttpResponse implements HttpResponse {
         //content-length
         if(contentLength != 0){
             sb.append("Content-Length: ").append(contentLength).append("\r\n");
+        } else{
+            sb.append("Content-Length: ").append("48").append("\r\n");
         }
         sb.append("Connection: close\r\n"); //now can't support keep-alive
         //cookies
@@ -146,6 +152,7 @@ public class ServletHttpResponse implements HttpResponse {
         }
         sb.append("\r\n");
         try {
+            log.debug(sb.toString());
             socketOutputStream.write(sb.toString().getBytes(contentEncoding));
         } catch (IOException e) {
             throw new ServerErrorException("response write error: ioexception: "+e.getMessage());
