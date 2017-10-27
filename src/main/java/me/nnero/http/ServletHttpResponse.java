@@ -137,8 +137,6 @@ public class ServletHttpResponse implements HttpResponse {
         //content-length
         if(contentLength != 0){
             sb.append("Content-Length: ").append(contentLength).append("\r\n");
-        } else{
-            sb.append("Content-Length: ").append("48").append("\r\n");
         }
         sb.append("Connection: close\r\n"); //now can't support keep-alive
         //cookies

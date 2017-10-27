@@ -52,5 +52,7 @@ public class ErrorHandler {
         pw.print(": ");
         pw.print(msg);
         pw.print(code == 500 ? Constants.SERVER_ERROR_PAGE_END : Constants.ERROR_PAGE_END);
+        pw.flush();
+        pw.close();
     }
 }
