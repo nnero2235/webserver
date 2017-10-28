@@ -21,7 +21,7 @@ public class ServletRegistry {
     public void initRegistry(){
         try {
             ResourceLoader.getLoader().loadWebXMLConfigFile((className,path) -> {
-                servletMappingRegistry.put(className,path);
+                servletMappingRegistry.put(path,className);
             });
             log.info("web.xml init success!");
         } catch (DocumentException e) {

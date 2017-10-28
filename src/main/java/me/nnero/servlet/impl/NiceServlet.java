@@ -16,6 +16,7 @@ public class NiceServlet extends HttpServlet {
     public void doGet(HttpRequest request, HttpResponse response) {
         PrintWriter pw = response.getWriter();
         pw.print("Hello world!");
+        pw.flush();
     }
 
     @Override

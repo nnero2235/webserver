@@ -44,7 +44,7 @@ public class ServletHttpResponse implements HttpResponse {
         this.socketOutputStream = os;
         this.headerMap = new HashMap<>();
         this.statusCode = StatusCode.OK;
-        this.mimeType = MimeType.GENERAL;
+        this.mimeType = MimeType.TEXT_HTML;
         this.contentEncoding = Charset.defaultCharset();
     }
 

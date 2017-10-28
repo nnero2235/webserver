@@ -37,7 +37,7 @@ public class Connection implements Runnable{
         } catch (IOException e) {
             log.error("",e);
         }
-        log.info("server shutdown!");
+        log.info("Connection closed!");
     }
 
     @Override
@@ -57,10 +57,10 @@ public class Connection implements Runnable{
         } catch (IOException e) {
             log.error("",e);
         } catch (BadRequestException e){
-            log.error("",e);
+            log.warn("Bad Request: "+e.getMessage());
             ErrorHandler.getHandler().handle(StatusCode.BAD_REQUEST,e.getMessage(),response);
         } catch (NotFoundException e){
-            log.error("",e);
+            log.warn("Not found: "+e.getMessage());
             ErrorHandler.getHandler().handle(StatusCode.NOT_FOUND,e.getMessage(),response);
         } catch (ServerErrorException e){
             log.error("",e);

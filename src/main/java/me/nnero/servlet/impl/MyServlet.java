@@ -12,6 +12,7 @@ public class MyServlet extends HttpServlet {
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
         response.getWriter().print("你好");
+        response.getWriter().flush();
     }
 
     @Override
