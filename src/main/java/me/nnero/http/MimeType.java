@@ -15,7 +15,8 @@ public enum MimeType {
     TEXT_PLAIN("text/plain"),
     IMAGE("image/*"),
     IMAGE_PNG("image/png"),
-    IMAGE_JPG("image/jpg");
+    IMAGE_JPG("image/jpg"),
+    MULTI_PART("multipart/form-data");
 
     private String type;
 
@@ -48,6 +49,8 @@ public enum MimeType {
             return IMAGE_PNG;
         } else if (IMAGE_JPG.type.equalsIgnoreCase(mimeTypeStr)) {
             return IMAGE_JPG;
+        } else if(MULTI_PART.type.equalsIgnoreCase(mimeTypeStr)){
+            return MULTI_PART;
         }
         return GENERAL;
     }

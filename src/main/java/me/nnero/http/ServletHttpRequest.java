@@ -134,7 +134,7 @@ public class ServletHttpRequest implements HttpRequest{
                         if ("GET".equals(method)) { //means parse is over
                             break;
                         } else if ("POST".equals(method)) { //means needing to parse requestBody
-                            requestBody = new RequestBody(socketInputStream, contentLength);
+                            requestBody = new RequestBody(socketInputStream, contentLength,getHeader("content-type"));
                             break;
                         } else {
                             break;

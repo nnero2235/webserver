@@ -18,10 +18,15 @@ public class RequestBody {
 
     private long contentLength;
 
-    public RequestBody(InputStream is,long contentLength){
+    private String contentType;
+
+    public RequestBody(InputStream is,long contentLength,String contentType){
         this.is = is;
         this.contentLength = contentLength;
+        this.contentType= contentType;
     }
+
+
 
     public InputStream getInputStream(){
         return is;
