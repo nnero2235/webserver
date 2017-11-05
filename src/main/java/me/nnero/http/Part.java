@@ -1,5 +1,7 @@
 package me.nnero.http;
 
+import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
 import me.nnero.http.exception.BadRequestException;
 
 import java.io.BufferedReader;
@@ -13,113 +15,124 @@ import java.util.Map;
  * Author: NNERO
  * Time: 2017/10/29 22:06
  **/
+@Slf4j
 public class Part {
 
     private InputStream is;
 
-    private String boundary;
-
     private byte[] boundaryBytes;
 
-    private BufferedReader reader;
+    private byte[] boundaryBuf;
 
-    private Map<String,String> partInfoMap;
+    private boolean isOver;
 
-    private byte[] overFlowData; //buf next more data
+    private Map<String, String> partInfoMap;
 
-    public Part(InputStream is,String boundary) throws IOException {
-        this.boundary = boundary;
-        this.boundaryBytes = this.boundary.getBytes();
+    private int matchCount;
+
+    private boolean valid;
+
+    public Part(InputStream is, String boundary) throws IOException {
+        this.boundaryBytes = boundary.getBytes();
         this.is = is;
-        this.reader =  new BufferedReader(new InputStreamReader(this.is));
+        this.boundaryBuf = new byte[256];
+        this.valid = true;
         decodePartInfo();
     }
 
     private void decodePartInfo() throws IOException {
         String line = null;
-        line = reader.readLine();
-        if(!line.equals(boundary)){
-            throw new BadRequestException("multipart error: boundary is wrong: "+line+" boundary is: "+boundary);
-        }
         partInfoMap = new HashMap<>();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(this.is));
         while (true) {
             line = reader.readLine();
-            if("\r\n".equals(line)){
+            if(Strings.isNullOrEmpty(line)){//null part
+                valid = false;
+                return;
+            }
+            if ("\r\n".equals(line)) {
                 break;
             }
             String[] strArr = line.split(";");
             for (String s : strArr) {
                 int index = s.lastIndexOf(":");
-                if(index == -1){
+                if (index == -1) {
                     index = s.lastIndexOf("=");
                 }
-                if(index != -1){
-                    String key = line.substring(0,index).trim().toLowerCase();
-                    String value = line.substring(index+1).trim().toLowerCase();
-                    partInfoMap.put(key,value);
+                if (index != -1) {
+                    String key = line.substring(0, index).trim().toLowerCase();
+                    String value = line.substring(index + 1).trim().toLowerCase();
+                    partInfoMap.put(key, value);
                 }
             }
         }
     }
 
-    public String getPartInfo(String name){
-        if(name == null){
-            throw new RuntimeException("get part info name is null");
+    public String getPartInfo(String name) {
+        if (name == null) {
+            throw new NullPointerException("name is null");
         }
         return partInfoMap.get(name);
     }
 
+    public boolean hasData(){
+        return valid;
+    }
+
     //return -1 when reach end
     public int readData(byte[] buf) throws IOException {
-        int length = is.read(buf);
-        int boundaryLength = getDataBoundary(buf,length,boundaryBytes);
-        if(boundaryLength != -1){
-            return boundaryLength;
+        if (buf == null) {
+            throw new NullPointerException("buf is null");
         }
-        return length;
-    }
 
-    byte[] getOverFlowData(){
-        return overFlowData;
-    }
+        if(!valid){
+            log.warn("this part is invalided!");
+            return -1;
+        }
 
+        if (isOver) {
+            byte br = (byte) is.read();
+            byte bn = (byte) is.read();
+            if (br == '\r' && bn == '\n') {
+                return -1;
+            } else {
+                 throw new BadRequestException("Error boundary lack \\r\\n");
+            }
+        }
 
-    //return data boundary length or -1 means not reached
-    private int getDataBoundary(byte[] data,int length,byte[] boundary) throws IOException {
-        boolean matched = false;
-        int matchCount = 0;
-        for(int i=0;i<length;i++){
-            if(data[i] == boundary[i]){
-                matched = true;
+        if (matchCount != 0) {
+            System.arraycopy(boundaryBuf, 0, buf, 0, matchCount);
+        }
+
+        int length = 0;
+        matchCount = 0;
+
+        while (true) {
+            if (length == buf.length) {
+                return length;
+            }
+            byte b = (byte) is.read();
+            if (b == boundaryBytes[matchCount]) {
+                boundaryBuf[matchCount] = b;
                 matchCount++;
-                if(matchCount == boundary.length -1){
-                    if(i < length -1) {
-                        overFlowData = new byte[length - i];
-                        System.arraycopy(data, length - i + 1, overFlowData, 0, length - i + 1);
-                    }
-                    return i;
+                if (matchCount == boundaryBytes.length) {
+                    isOver = true;
+                    return length;
                 }
             } else {
-                matched = false;
-                matchCount = 0;
-            }
-            if(matched && i == length -1){
-                byte[] tmpBuf = new byte[256];
-                int len = is.read(tmpBuf);
-                for(int j=0;j<len;j++){
-                    if(tmpBuf[j] == boundary[i+j]){
-                        matchCount++;
-                        if(matchCount == boundary.length -1){
-                            len = j;
-                            break;
-                        }
+                if (matchCount != 0) {
+                    if (matchCount + length > buf.length) {
+                        return length;
+                    } else {
+                        System.arraycopy(boundaryBuf, 0, buf, length, matchCount);
+                        length += matchCount;
                     }
                 }
-                overFlowData = new byte[256-len];
-                System.arraycopy(tmpBuf,len+1,overFlowData,0,256-len -1);
-                return i;
+                matchCount = 0;
+                buf[length] = b;
+                length++;
             }
         }
-        return -1;
     }
+
 }

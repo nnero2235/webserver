@@ -2,7 +2,10 @@ package me.nnero.http;
 
 import me.nnero.http.exception.BadRequestException;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,9 +20,7 @@ public class MultiPart {
 
     private String boundary;
 
-    private List<Part> parts;
-
-    public MultiPart(String contentType, InputStream is){
+    public MultiPart(String contentType, InputStream is) throws IOException {
         if(!contentType.startsWith(MimeType.MULTI_PART.type())){
             throw new RuntimeException("content-type is not multipart/form-data");
         }
@@ -29,10 +30,18 @@ public class MultiPart {
         }
         boundary = contentType.substring(index+1);
         this.is = is;
-        parts = new ArrayList<>();
+        checkBoundary();
     }
 
-    public Part nextPart(){
+    public Part nextPart() throws IOException {
         return new Part(is,boundary);
+    }
+
+    private void checkBoundary() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        String line = reader.readLine();
+        if(!boundary.equals(line)){
+            throw new BadRequestException("boundary is wrong!,this is:"+line+" but real is: "+boundary);
+        }
     }
 }

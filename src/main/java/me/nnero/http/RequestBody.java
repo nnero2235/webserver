@@ -26,10 +26,12 @@ public class RequestBody {
         this.contentType= contentType;
     }
 
-
-
     public InputStream getInputStream(){
         return is;
+    }
+
+    public MultiPart getMultiPart() throws IOException {
+        return new MultiPart(contentType,is);
     }
 
     /**
