@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.errorprone.annotations.SuppressPackageLocation;
 import lombok.extern.slf4j.Slf4j;
 import me.nnero.http.exception.ServerErrorException;
+import me.nnero.http.io.ServletOutputStream;
 import me.nnero.util.Constants;
 
 import java.io.IOException;
@@ -22,8 +23,6 @@ import java.util.Map;
 @Slf4j
 public class ServletHttpResponse implements HttpResponse {
 
-    private OutputStream socketOutputStream;
-
     private List<Cookie> cookies;
 
     private Map<String,String> headerMap;
@@ -40,8 +39,10 @@ public class ServletHttpResponse implements HttpResponse {
 
     private boolean isWroteMetaData;
 
+    private ServletOutputStream outputStream;
+
     public ServletHttpResponse(OutputStream os){
-        this.socketOutputStream = os;
+        this.outputStream = new ServletOutputStream(os);
         this.headerMap = new HashMap<>();
         this.statusCode = StatusCode.OK;
         this.mimeType = MimeType.TEXT_HTML;
@@ -98,7 +99,7 @@ public class ServletHttpResponse implements HttpResponse {
             isWroteMetaData = true;
         }
         if(printWriter == null) {
-            printWriter = new PrintWriter(socketOutputStream);
+            printWriter = new PrintWriter(outputStream);
         }
         return printWriter;
     }
@@ -112,12 +113,12 @@ public class ServletHttpResponse implements HttpResponse {
     }
 
     @Override
-    public OutputStream getOutputStream() {
+    public ServletOutputStream getOutputStream() {
         if(!isWroteMetaData){
             writeAndFlushResponseLineAndHeader();
             isWroteMetaData = true;
         }
-        return socketOutputStream;
+        return outputStream;
     }
 
     @Override
@@ -137,6 +138,9 @@ public class ServletHttpResponse implements HttpResponse {
         //content-length
         if(contentLength != 0){
             sb.append("Content-Length: ").append(contentLength).append("\r\n");
+            outputStream.setChunkedEnabled(false);
+        } else {//means  chunked
+            sb.append("Transfer-Encoding: chunked\r\n");
         }
         sb.append("Connection: close\r\n"); //now can't support keep-alive
         //cookies
@@ -151,7 +155,7 @@ public class ServletHttpResponse implements HttpResponse {
         sb.append("\r\n");
         try {
             log.debug(sb.toString());
-            socketOutputStream.write(sb.toString().getBytes(contentEncoding));
+            outputStream.write(sb.toString().getBytes(contentEncoding));
         } catch (IOException e) {
             throw new ServerErrorException("response write error: ioexception: "+e.getMessage());
         }

@@ -1,5 +1,7 @@
 package me.nnero.http;
 
+import me.nnero.http.io.ServletOutputStream;
+
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
@@ -31,7 +33,7 @@ public interface HttpResponse {
 
     void addCookie(Cookie cookie);
 
-    OutputStream getOutputStream();
+    ServletOutputStream getOutputStream();
 
     void setContentEncoding(Charset charset);
 }
